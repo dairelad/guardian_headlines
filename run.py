@@ -4,23 +4,13 @@
 # sentiment is a view or opinion held by a body, in this case the Guardian
 
 import urllib
-import requests
 import json
-import time
 import settings
-import pprint
 import argparse
 import pandas as pd
 from textblob import TextBlob
 import dateparser
-from pandas.plotting import register_matplotlib_converters
-import datetime
-
 import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
-import matplotlib.dates as mdates
-
-register_matplotlib_converters()
 
 # code used to add a help flag when running the script (-h)
 # also prints the required arguments to run when they are not provided correctly
@@ -40,7 +30,7 @@ def sentiment_analysis(text):
 
 def scrape_articles(args):
     # create pandas df with relevant columns
-    article_db = pd.DataFrame(columns=['article_title', 'article_section', 'article_date', 'article_url', 'title_sentiment', 'title_subjectivity','sentiment_level','subjectivity level'])
+    article_db = pd.DataFrame(columns=['article_title', 'article_section', 'article_date', 'article_url', 'title_sentiment', 'title_subjectivity','sentiment_level','subjectivity_level'])
 
     for page in range(1, args.pages+1):
         url = 'https://content.guardianapis.com/search?&q={}&api-key={}&from-date={}&page-size=10&page={}&order-by=relevance'.format(args.keyword, settings.API_KEY, args.from_date, page)
@@ -94,22 +84,26 @@ def visualise_sentiment(df, args):
         elif row['subjectivity_level'] == 'Subjective':
             sub += 1
 
-    values = {'neg':neg, 'pos':pos, 'neu':neu, 'obj':obj, 'sub':sub}
-    values = pd.DataFrame(values)
+    values = [neg,pos,neu,obj,sub]
+    x_axis = ['Neg','Pos','Neu','Obj','Sub']
 
-# TODO finish plotting section of code (bar for each series of data)
-    values.plot.hist(grid=True, bins=20, rwidth=0.9,
-                       color='#607c8e')
-    plt.title(f'Sentiment surround the keyword ({args[1]}) in the Guardian headlines')
-    plt.xlabel('Count')
-    plt.ylabel('Commute Time')
-    plt.grid(axis='y', alpha=0.75)
+    # plot data
+    plt.bar(x_axis,values,color=['black', 'black', 'black', 'blue', 'blue'])
+    plt.bar(x_axis,0)
+    plt.xlabel('Measures of Sentiment')
+    plt.ylabel('Count')
+    plt.title(f'Sentiment surround the keyword ({args.keyword}) in the Guardian headlines')
+    plt.legend(labels=['Sentiment', 'Subjectivity'])
+    ax = plt.gca()
+    leg = ax.get_legend()
+    leg.legendHandles[0].set_color('black')
+    leg.legendHandles[1].set_color('blue')
+    plt.show()
 
 
 if __name__ == '__main__':
     args = parser.parse_args() # checks that the correct arguments have been provided to run the program
     df = scrape_articles(args) # scrapes the guardian website for the relevant articles
-    print(df)
 
     visualise_sentiment(df, args)
     df.to_csv('Guardian_{}_sentiment_{}.csv'.format(args.keyword, datetime.datetime.now())) # writes results to csv
