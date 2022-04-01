@@ -92,7 +92,7 @@ def visualise_sentiment(df, args):
     plt.bar(x_axis,0)
     plt.xlabel('Measures of Sentiment')
     plt.ylabel('Count')
-    plt.title(f'Sentiment surround the keyword ({args.keyword}) in the Guardian headlines')
+    plt.title(f'Sentiment surrounding the keyword ({args.keyword}) in the Guardian headlines')
     plt.legend(labels=['Sentiment', 'Subjectivity'])
     ax = plt.gca()
     leg = ax.get_legend()
